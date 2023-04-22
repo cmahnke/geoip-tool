@@ -1,7 +1,7 @@
 FROM golang:1.20
 
 LABEL maintainer="cmahnke@gmail.com"
-LABEL org.opencontainers.image.source=https://gitlab.gwdg.de/forumwissengoe/fowi-cms-logs
+LABEL org.opencontainers.image.source=https://github.com/cmahnke/geoip-tool
 
 ENV MOD_DIR=/go/src/christianmahnke.de/tools/data/geoip-tool
 
