@@ -12,7 +12,7 @@ This tool can be used to create a [MMDB database](https://maxmind.github.io/MaxM
 Use docker to built a image containing the tool as `/go/bingeoip-tool`.
 
 ```
-docker buildx build .
+docker buildx build . -t ghcr.io/cmahnke/geoip-tool:latest
 ```
 
 ## Golang
