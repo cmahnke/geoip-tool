@@ -47,7 +47,8 @@ func main() {
 		writer, err = mmdbwriter.Load(*database, mmdbwriter.Options{IncludeReservedNetworks: true})
 
 	} else {
-		writer, err = mmdbwriter.New(mmdbwriter.Options{IncludeReservedNetworks: true, IPVersion: 4, DatabaseType: *dbtype})
+		description := map[string]string{"en": "Simple Database for GeoIP lookups"}
+		writer, err = mmdbwriter.New(mmdbwriter.Options{IncludeReservedNetworks: true, IPVersion: 4, DatabaseType: *dbtype, Languages: []string{"en", "de"}, Description: description})
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -98,11 +99,8 @@ func main() {
 		}
 
 		locData := mmdbtype.Map{
-			"continent_name": mmdbtype.String("Europe"),
-			"continent_code": mmdbtype.String("EU"),
-
 			"continent": mmdbtype.Map{
-				"geoname_id": mmdbtype.Int32(default_continent_geonames_id),
+				"geoname_id": mmdbtype.Uint32(default_continent_geonames_id),
 				"code":       mmdbtype.String(default_continent_code),
 				"names": mmdbtype.Map{
 					"en": mmdbtype.String(default_continent_name),
@@ -110,31 +108,30 @@ func main() {
 			},
 
 			"country": mmdbtype.Map{
-				"geoname_id": mmdbtype.Int32(default_country_geonames_id),
-				"iso_code":   mmdbtype.String("DE"),
+				"geoname_id":           mmdbtype.Uint32(default_country_geonames_id),
+				"iso_code":             mmdbtype.String(default_country_code),
+				"is_in_european_union": mmdbtype.Bool(true),
 				"names": mmdbtype.Map{
 					"en": mmdbtype.String(default_country_name),
 				},
 			},
 
 			"city": mmdbtype.Map{
-				"geoname_id": mmdbtype.Int32(default_city_geoname_id),
-				"names": mmdbtype.Slice{
-					mmdbtype.Map{
-						"de": mmdbtype.String(default_city_name),
-						"en": mmdbtype.String(default_city_name),
-					}}},
+				"geoname_id": mmdbtype.Uint32(default_city_geoname_id),
+				"names": mmdbtype.Map{
+					"en": mmdbtype.String(default_city_name),
+					"de": mmdbtype.String(default_city_name),
+				}},
 			"name":     mmdbtype.String(entry["name"]),
 			"location": location,
 			"subdivisions": mmdbtype.Slice{
 				mmdbtype.Map{
 					"iso_code": mmdbtype.String(fmt.Sprintf("%2s", floor)),
 					"name":     mmdbtype.String(entry["name"]),
-					"names": mmdbtype.Slice{
-						mmdbtype.Map{
-							"de": mmdbtype.String(entry["name"]),
-							"en": mmdbtype.String(entry["name"]),
-						}}}},
+					"names": mmdbtype.Map{
+						"en": mmdbtype.String(entry["name"]),
+						"de": mmdbtype.String(entry["name"]),
+					}}},
 			"floor": mmdbtype.String(floor),
 		}
 
