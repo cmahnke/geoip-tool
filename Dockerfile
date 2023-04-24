@@ -13,4 +13,4 @@ FROM alpine:3
 LABEL maintainer="cmahnke@gmail.com"
 LABEL org.opencontainers.image.source=https://github.com/cmahnke/geoip-tool
 
-COPY --from=builder /go/bin/geoip-tool /usr/local/bin
+COPY --from=builder /go/bin/geoip-tool /usr/local/bin/

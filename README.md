@@ -74,3 +74,31 @@ Copy the output file to the `/config/ingest-geoip` of Elasticsearch, create the 
   ]
 }
 ```
+
+## Running
+
+Using Docker:
+
+```
+docker run -v "`pwd`:`pwd`" -w "`pwd`" ghcr.io/cmahnke/geoip-tool:latest /usr/local/bin/geoip-tool [args]
+```
+
+See above for `[args]`.
+
+## Query the database
+
+One can use the [`mmdbinspect`](https://github.com/maxmind/mmdbinspect) tool to query the database.
+
+### Installation
+
+```
+go install github.com/maxmind/mmdbinspect/cmd/mmdbinspect@latest
+```
+
+### Query
+
+```
+$(go env GOPATH)/bin/mmdbinspect -db geoip.mmdb 1.2.3.4
+```
+
+Replace `1.2.3.4` with the IP adress to query

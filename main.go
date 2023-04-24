@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -16,8 +17,18 @@ import (
 )
 
 var (
-	writer *mmdbwriter.Tree
-	suffix = "/32"
+	writer                        *mmdbwriter.Tree
+	suffix                        = "/32"
+	name_field                    = "city_name"
+	floor_as_timezone             = true
+	default_continent_name        = "Europe"
+	default_continent_geonames_id = 6255148
+	default_continent_code        = "EU"
+	default_country_name          = "Germany"
+	default_country_geonames_id   = 2921044
+	default_country_code          = "DE"
+	default_city_name             = "Göttingen"
+	default_city_geoname_id       = 2918632
 )
 
 func main() {
@@ -77,16 +88,54 @@ func main() {
 			floor = val
 		}
 
+		location := mmdbtype.Map{
+			"latitude":  mmdbtype.Float64(lat),
+			"longitude": mmdbtype.Float64(lon),
+		}
+
+		if floor_as_timezone {
+			location["time_zone"] = mmdbtype.String(floor)
+		}
+
 		locData := mmdbtype.Map{
-			"continent_name":   mmdbtype.String("Europe"),
-			"continent_code":   mmdbtype.String("EU"),
-			"country_name":     mmdbtype.String("Germany"),
-			"country_iso_code": mmdbtype.String("DE"),
-			"city_name":        mmdbtype.String("Göttingen"),
-			"name":             mmdbtype.String(entry["name"]),
-			"latitude":         mmdbtype.Float64(lat),
-			"longitude":        mmdbtype.Float64(lon),
-			"floor":            mmdbtype.String(floor),
+			"continent_name": mmdbtype.String("Europe"),
+			"continent_code": mmdbtype.String("EU"),
+
+			"continent": mmdbtype.Map{
+				"geoname_id": mmdbtype.Int32(default_continent_geonames_id),
+				"code":       mmdbtype.String(default_continent_code),
+				"names": mmdbtype.Map{
+					"en": mmdbtype.String(default_continent_name),
+				},
+			},
+
+			"country": mmdbtype.Map{
+				"geoname_id": mmdbtype.Int32(default_country_geonames_id),
+				"iso_code":   mmdbtype.String("DE"),
+				"names": mmdbtype.Map{
+					"en": mmdbtype.String(default_country_name),
+				},
+			},
+
+			"city": mmdbtype.Map{
+				"geoname_id": mmdbtype.Int32(default_city_geoname_id),
+				"names": mmdbtype.Slice{
+					mmdbtype.Map{
+						"de": mmdbtype.String(default_city_name),
+						"en": mmdbtype.String(default_city_name),
+					}}},
+			"name":     mmdbtype.String(entry["name"]),
+			"location": location,
+			"subdivisions": mmdbtype.Slice{
+				mmdbtype.Map{
+					"iso_code": mmdbtype.String(fmt.Sprintf("%2s", floor)),
+					"name":     mmdbtype.String(entry["name"]),
+					"names": mmdbtype.Slice{
+						mmdbtype.Map{
+							"de": mmdbtype.String(entry["name"]),
+							"en": mmdbtype.String(entry["name"]),
+						}}}},
+			"floor": mmdbtype.String(floor),
 		}
 
 		err = writer.InsertFunc(ipv4Net, inserter.TopLevelMergeWith(locData))
