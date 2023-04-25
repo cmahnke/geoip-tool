@@ -16,17 +16,20 @@ import (
 
 var (
 	writer                        *mmdbwriter.Tree
-	suffix                        = "/32"
-	name_field                    = "city_name"
-	floor_as_timezone             = true
-	default_continent_name        = "Europe"
-	default_continent_geonames_id = 6255148
-	default_continent_code        = "EU"
-	default_country_name          = "Germany"
-	default_country_geonames_id   = 2921044
-	default_country_code          = "DE"
-	default_city_name             = "Göttingen"
-	default_city_geoname_id       = 2918632
+	suffix                                = "/32"
+	name_field                            = "city_name"
+	floor_as_timezone                     = true
+	default_continent_name                = "Europe"
+	default_continent_geonames_id         = 6255148
+	default_continent_code                = "EU"
+	default_country_name                  = "Germany"
+	default_country_geonames_id           = 2921044
+	default_country_code                  = "DE"
+	default_city_name                     = "Göttingen"
+	default_city_geoname_id               = 2918632
+	default_lat                   float64 = 51.5441
+	default_lon                   float64 = 9.9254
+	default_accuracy              float32 = 5
 )
 
 type Ip struct {
@@ -72,7 +75,7 @@ func main() {
 
 	decoder := json.NewDecoder(reader)
 	for decoder.More() {
-		ip := Ip{Accuracy: 999}
+		ip := Ip{Accuracy: default_accuracy, Lat: default_lat, Lon: default_lon}
 		if err := decoder.Decode(&ip); err != nil {
 			log.Fatal(err)
 		}
