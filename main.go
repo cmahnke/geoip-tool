@@ -1,16 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/bfontaine/jsons"
 	"github.com/maxmind/mmdbwriter"
 	"github.com/maxmind/mmdbwriter/inserter"
 	"github.com/maxmind/mmdbwriter/mmdbtype"
@@ -30,6 +28,15 @@ var (
 	default_city_name             = "Göttingen"
 	default_city_geoname_id       = 2918632
 )
+
+type Ip struct {
+	Ip       string  `json:"ip"`
+	Name     string  `json:"name"`
+	Floor    string  `json:"floor"`
+	Accuracy float32 `json:"accuracy_radius"`
+	Lat      float64 `json:"lat"`
+	Lon      float64 `json:"lon"`
+}
 
 func main() {
 
@@ -56,47 +63,41 @@ func main() {
 		err = nil
 	}
 
-	// Read IPs
-	reader := jsons.NewFileReader(*ips)
-	if err := reader.Open(); err != nil {
+	reader, err := os.Open(*ips)
+	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer reader.Close()
 
-	for {
-		var entry map[string]string
-		if err := reader.Next(&entry); err != nil {
-			if err == io.EOF {
-				break
-			}
+	decoder := json.NewDecoder(reader)
+	for decoder.More() {
+		ip := Ip{Accuracy: 999}
+		if err := decoder.Decode(&ip); err != nil {
 			log.Fatal(err)
 		}
+
 		var ipv4Net *net.IPNet
 		var err error
-		var floor string
-		if !strings.Contains(entry["ip"], "/") {
-			_, ipv4Net, err = net.ParseCIDR(entry["ip"] + suffix)
+		if !strings.Contains(ip.Ip, "/") {
+			_, ipv4Net, err = net.ParseCIDR(ip.Ip + suffix)
 		} else {
-			_, ipv4Net, err = net.ParseCIDR(entry["ip"])
+			_, ipv4Net, err = net.ParseCIDR(ip.Ip)
 		}
 		if err != nil {
 			log.Fatal(err)
 		}
-		lat, err := strconv.Atoi(entry["lat"])
-		lon, err := strconv.Atoi(entry["lon"])
-
-		if val, ok := entry["floor"]; ok {
-			floor = val
-		}
 
 		location := mmdbtype.Map{
-			"latitude":  mmdbtype.Float64(lat),
-			"longitude": mmdbtype.Float64(lon),
+			"latitude":  mmdbtype.Float64(ip.Lat),
+			"longitude": mmdbtype.Float64(ip.Lon),
 		}
 
 		if floor_as_timezone {
-			location["time_zone"] = mmdbtype.String(floor)
+			location["time_zone"] = mmdbtype.String(ip.Floor)
 		}
+
+		location["accuracy_radius"] = mmdbtype.Int32(ip.Accuracy)
 
 		locData := mmdbtype.Map{
 			"continent": mmdbtype.Map{
@@ -122,24 +123,25 @@ func main() {
 					"en": mmdbtype.String(default_city_name),
 					"de": mmdbtype.String(default_city_name),
 				}},
-			"name":     mmdbtype.String(entry["name"]),
+
+			"name":     mmdbtype.String(ip.Name),
 			"location": location,
 			"subdivisions": mmdbtype.Slice{
 				mmdbtype.Map{
-					"iso_code": mmdbtype.String(fmt.Sprintf("%2s", floor)),
-					"name":     mmdbtype.String(entry["name"]),
+					"iso_code": mmdbtype.String(fmt.Sprintf("%2s", ip.Floor)),
+					"name":     mmdbtype.String(ip.Name),
 					"names": mmdbtype.Map{
-						"en": mmdbtype.String(entry["name"]),
-						"de": mmdbtype.String(entry["name"]),
+						"en": mmdbtype.String(ip.Name),
+						"de": mmdbtype.String(ip.Name),
 					}}},
-			"floor": mmdbtype.String(floor),
+			"floor": mmdbtype.String(ip.Floor),
 		}
 
 		err = writer.InsertFunc(ipv4Net, inserter.TopLevelMergeWith(locData))
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("Inserted %s, name '%s': {lat: %f, lon:%f}, floor: %s", ipv4Net, entry["name"], lat, lon, floor)
+		log.Printf("Inserted %s, name '%s': {lat: %f, lon:%f}, floor: %s, accuracy_radius: %f", ipv4Net, ip.Name, ip.Lat, ip.Lon, ip.Floor, ip.Accuracy)
 	}
 
 	// Write results

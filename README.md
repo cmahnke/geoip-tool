@@ -43,17 +43,17 @@ go build
 The input file format is [NDJSON](http://ndjson.org/). Each line should be it's own JSON document.
 
 ```
-{"ip": "", "name": "", "lat": "", "long":"", "floor": ""}
+{"ip": "", "name": "", "lat": "", "lon":"", "floor": "", "accuracy_radius": ""}
 ```
 
-| Field | Description                           |
-|-------|---------------------------------------|
-| ip    | IP adress or sub net in CIDR notation |
-| name  | Name of IP or sub net                 |
-| lat   | Lattitute                             |
-| long  | Longitute                             |
-| floor | Floor / Name of Floor                 |
-
+| Field           | Type   | Description                                                                           |
+|-----------------|--------|---------------------------------------------------------------------------------------|
+| ip              | String | IP adress or sub net in CIDR notation, if no host identifier is given `/32`is assumed |
+| name            | String | Name of IP or sub net                                                                 |
+| lat             | Number | Lattitute                                                                             |
+| lon             | Number | Longitute                                                                             |
+| floor           | String | Floor / Name of Floor                                                                 |
+| accuracy_radius | Number | Accuracy radius                                                                       |
 
 ## As a Elasticsearch pipeline
 
@@ -68,7 +68,7 @@ Copy the output file to the `/config/ingest-geoip` of Elasticsearch, create the 
         "ignore_missing": true,
         "ignore_failure": true,
         "database_file": "geoip.mmdb",
-        "properties": ["name", "lat", "long", "floor"]
+        "properties": ["region_name", "region_iso_code", "location", "city_name", "country_name"]
       }
     }
   ]
