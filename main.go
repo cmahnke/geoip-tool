@@ -93,13 +93,19 @@ func main() {
 			log.Fatal(err)
 		}
 
-		location := mmdbtype.Map{}
+		var lon float64
+		var lat float64
 		if ip.Lon != 0 && ip.Lat != 0 {
-			location["longitude"] = mmdbtype.Float64(ip.Lon)
-			location["latitude"] = mmdbtype.Float64(ip.Lat)
+			lon = ip.Lon
+			lat = ip.Lat
 		} else {
-			location["longitude"] = mmdbtype.Float64(ip.Coordinates[0])
-			location["latitude"] = mmdbtype.Float64(ip.Coordinates[1])
+			lon = ip.Coordinates[0]
+			lat = ip.Coordinates[1]
+		}
+
+		location := mmdbtype.Map{
+			"longitude": mmdbtype.Float64(lon),
+			"latitude":  mmdbtype.Float64(ip.Lat),
 		}
 
 		if floor_as_timezone {
@@ -150,7 +156,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("Inserted %s, name '%s': {lat: %f, lon:%f}, floor: %s, accuracy_radius: %f", ipv4Net, ip.Name, ip.Lat, ip.Lon, ip.Floor, ip.Accuracy)
+		log.Printf("Inserted %s, name '%s': {lon: %f, lat:%f}, floor: %s, accuracy_radius: %f", ipv4Net, ip.Name, lon, lat, ip.Floor, ip.Accuracy)
 	}
 
 	// Write results
