@@ -105,7 +105,7 @@ func main() {
 
 		location := mmdbtype.Map{
 			"longitude": mmdbtype.Float64(lon),
-			"latitude":  mmdbtype.Float64(ip.Lat),
+			"latitude":  mmdbtype.Float64(lat),
 		}
 
 		if floor_as_timezone {
