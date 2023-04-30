@@ -25,6 +25,7 @@ var (
 	default_country_name                  = "Germany"
 	default_country_geonames_id           = 2921044
 	default_country_code                  = "DE"
+	default_is_in_european_union          = true
 	default_city_name                     = "Göttingen"
 	default_city_geoname_id               = 2918632
 	default_lat                   float64 = 51.5441
@@ -33,12 +34,13 @@ var (
 )
 
 type Ip struct {
-	Ip       string  `json:"ip"`
-	Name     string  `json:"name"`
-	Floor    string  `json:"floor"`
-	Accuracy float32 `json:"accuracy_radius"`
-	Lat      float64 `json:"lat"`
-	Lon      float64 `json:"lon"`
+	Ip          string     `json:"ip"`
+	Name        string     `json:"name"`
+	Floor       string     `json:"floor"`
+	Accuracy    float32    `json:"accuracy_radius"`
+	Lon         float64    `json:"lon"`
+	Lat         float64    `json:"lat"`
+	Coordinates [2]float64 `json:"coordinates"`
 }
 
 func main() {
@@ -75,7 +77,7 @@ func main() {
 
 	decoder := json.NewDecoder(reader)
 	for decoder.More() {
-		ip := Ip{Accuracy: default_accuracy, Lat: default_lat, Lon: default_lon}
+		ip := Ip{Accuracy: default_accuracy, Coordinates: [2]float64{default_lon, default_lat}}
 		if err := decoder.Decode(&ip); err != nil {
 			log.Fatal(err)
 		}
@@ -91,9 +93,13 @@ func main() {
 			log.Fatal(err)
 		}
 
-		location := mmdbtype.Map{
-			"latitude":  mmdbtype.Float64(ip.Lat),
-			"longitude": mmdbtype.Float64(ip.Lon),
+		location := mmdbtype.Map{}
+		if ip.Lon != 0 && ip.Lat != 0 {
+			location["longitude"] = mmdbtype.Float64(ip.Lon)
+			location["latitude"] = mmdbtype.Float64(ip.Lat)
+		} else {
+			location["longitude"] = mmdbtype.Float64(ip.Coordinates[0])
+			location["latitude"] = mmdbtype.Float64(ip.Coordinates[1])
 		}
 
 		if floor_as_timezone {
@@ -114,7 +120,7 @@ func main() {
 			"country": mmdbtype.Map{
 				"geoname_id":           mmdbtype.Uint32(default_country_geonames_id),
 				"iso_code":             mmdbtype.String(default_country_code),
-				"is_in_european_union": mmdbtype.Bool(true),
+				"is_in_european_union": mmdbtype.Bool(default_is_in_european_union),
 				"names": mmdbtype.Map{
 					"en": mmdbtype.String(default_country_name),
 				},
