@@ -33,7 +33,7 @@ jobs:
           driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@c4ee3adeed93b1fa6a762f209fb01608c1a22f1e
+        uses: docker/metadata-action@2c0bd771b40637d97bf205cbccdd294a32112176
         with:
           images: |
             ghcr.io/${{ github.repository }}
