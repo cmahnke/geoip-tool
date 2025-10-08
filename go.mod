@@ -1,11 +1,11 @@
 module christianmahnke.de/tools/data/geoip-tool
 
-go 1.20
+go 1.24
 
-require github.com/maxmind/mmdbwriter v1.0.0
+require github.com/maxmind/mmdbwriter v1.1.0
 
 require (
-	github.com/oschwald/maxminddb-golang v1.12.0 // indirect
-	go4.org/netipx v0.0.0-20220812043211-3cc044ffd68d // indirect
-	golang.org/x/sys v0.10.0 // indirect
+	github.com/oschwald/maxminddb-golang/v2 v2.0.0-beta.10 // indirect
+	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba // indirect
+	golang.org/x/sys v0.35.0 // indirect
 )
