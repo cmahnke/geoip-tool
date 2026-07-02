@@ -23,7 +23,7 @@ jobs:
           submodules: true
           fetch-depth: 0
       - name: Log in to the Container registry
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -32,12 +32,12 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4.1.0
+        uses: docker/setup-buildx-action@v4.2.0
         with:
           driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
         with:
           images: |
             ghcr.io/${{ github.repository }}
