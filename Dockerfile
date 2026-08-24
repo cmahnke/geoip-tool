@@ -1,4 +1,4 @@
-FROM golang:1.26 AS builder
+FROM golang:1.27 AS builder
 
 ENV MOD_DIR=/go/src/christianmahnke.de/tools/data/geoip-tool
 
